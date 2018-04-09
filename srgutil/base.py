@@ -19,7 +19,7 @@ class JSONCache:
     All data is expired simultaneously
     """
     def __init__(self, ctx):
-        assert 'utils' in ctx
+        assert 's3data' in ctx
         assert 'clock' in ctx
         self._ctx = ctx
 
@@ -38,19 +38,19 @@ class JSONCache:
 
     def fetch_json(self, url):
         with self._lock:
-            utils = self._ctx['utils']
+            s3data = self._ctx['s3data']
             if url not in self._json_cache:
-                self._json_cache[url] = utils.fetch_json(url)
+                self._json_cache[url] = s3data.fetch_json(url)
             content = self._json_cache[url]
             self.expire_cache()
             return content
 
     def get_s3_json_content(self, s3_bucket, s3_key):
         with self._lock:
-            utils = self._ctx['utils']
+            s3data = self._ctx['s3data']
             key = (s3_bucket, s3_key)
             if key not in self._s3_json_cache:
-                self._s3_json_cache[key] = utils.get_s3_json_content(s3_bucket, s3_key)
+                self._s3_json_cache[key] = s3data.get_s3_json_content(s3_bucket, s3_key)
             content = self._s3_json_cache[key]
             self.expire_cache()
             return content
