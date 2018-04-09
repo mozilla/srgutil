@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='mozilla-srgutil',
-    version='0.1.3',
+    version='0.1.4',
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     include_package_data=True,

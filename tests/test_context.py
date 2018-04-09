@@ -6,6 +6,7 @@
 Context
 """
 from srgutil.context import Context
+from srgutil.context import default_context
 
 
 def test_context():
@@ -28,3 +29,8 @@ def test_context():
 
     # Defaults work as expected
     assert child_ctx.get('foo', 'bar') == 42
+
+
+def test_default_context():
+    ctx = default_context()
+    print (ctx)

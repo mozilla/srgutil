@@ -66,8 +66,10 @@ class Context:
 
 def default_context():
     ctx = Context()
+    from srgutil import s3data
     from .base import Clock, JSONCache
 
+    ctx['s3data'] = s3data
     ctx['clock'] = Clock()
     ctx['json_cache'] = JSONCache(ctx)
     return ctx
