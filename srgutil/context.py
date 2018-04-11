@@ -13,6 +13,13 @@ configuration information as we pass the context through an object
 chain.
 """
 
+from srgutil.interfaces import IS3Data, IClock
+
+
+class InvalidInterface(Exception):
+    """Raise this when impl() fails to export an implementation"""
+    pass
+
 
 class Context:
     def __init__(self, delegate=None):
@@ -63,13 +70,17 @@ class Context:
 
         return Context(self)
 
+    def impl(self, iface):
+        instance = self._local_dict[iface]
+        if not isinstance(instance, iface):
+            raise InvalidInterface("Instance [%s] doesn't implement requested interface.")
+        return instance
+
 
 def default_context():
     ctx = Context()
-    from srgutil import s3data
-    from .base import Clock, JSONCache
+    from .base import Clock, S3Data
 
-    ctx['s3data'] = s3data
-    ctx['clock'] = Clock()
-    ctx['json_cache'] = JSONCache(ctx)
+    ctx[IClock] = Clock()
+    ctx[IS3Data] = S3Data(ctx)
     return ctx
