@@ -27,7 +27,19 @@ class IS3Data(ABC):
 
 
 class IClock(ABC):
-    """
-    """
-    # TODO:
-    pass
+    def time(self):
+        """Return epoch time in seconds like time.time()"""
+
+
+class IMozLogging(ABC):
+    def set_config(self, cfg):
+        """Override the default configuration of the logging system
+        """
+
+    def get_logger(self, name):
+        """Get a logger with the current configuration
+        """
+
+    def get_prefix(self):
+        """Get the logger prefix name
+        """

@@ -2,8 +2,8 @@ from setuptools import find_packages, setup
 
 setup(
     name='mozilla-srgutil',
-    version='0.1.5',
-    setup_requires=['pytest-runner'],
+    version='0.1.6',
+    setup_requires=['pytest-runner', 'dockerflow'],
     tests_require=['pytest'],
     include_package_data=True,
     packages=find_packages(exclude=['tests', 'tests/*']),

@@ -7,7 +7,7 @@ import requests_mock
 from moto import mock_s3
 from srgutil.context import default_context
 from srgutil.base import Clock
-from srgutil.interfaces import IS3Data
+from srgutil.interfaces import IS3Data, IMozLogging
 
 EXPECTED_JSON = {"foo": 42}
 EXPECTED_S3_JSON = {"foo": "bar"}
@@ -52,3 +52,37 @@ def test_get_s3_json_content(ctx):
     s3data.get_s3_json_content(bucket, key)
     jdata = s3data.get_s3_json_content(bucket, key)
     assert jdata == EXPECTED_S3_JSON
+
+
+@mock_s3
+def test_logger_name(ctx, capsys):
+    logging = ctx[IMozLogging]
+
+    assert logging.get_prefix() == 'srg'
+    logging.set_prefix('srgutil')
+
+    logger = logging.get_logger('foo')
+    logger.info("some log info")
+
+    captured = capsys.readouterr()
+    """
+    A typical dockerflow JSON message looks like:
+
+    {"Timestamp": 1524503396935840000,
+     "Hostname": "some_local_host",
+     "Type": "srgutil.foo",
+     "Fields": {"msg": "some log info"},
+     "Severity": 6,
+     "Logger": "srgutil",
+     "EnvVersion": "2.0",
+     "Pid": 7313}
+    """
+
+    jdata = json.loads(captured.err)
+    assert jdata['Logger'] == 'srgutil'
+
+    # The logger.get_logger method uses the application namespace as a
+    # prefix
+    assert jdata['Type'] == 'srgutil.foo'
+
+    assert jdata['Fields']['msg'] == 'some log info'

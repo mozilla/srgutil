@@ -13,7 +13,7 @@ configuration information as we pass the context through an object
 chain.
 """
 
-from srgutil.interfaces import IS3Data, IClock
+from srgutil.interfaces import IS3Data, IClock, IMozLogging
 
 
 class InvalidInterface(Exception):
@@ -80,7 +80,9 @@ class Context:
 def default_context():
     ctx = Context()
     from .base import Clock, S3Data
+    from .logging import Logging
 
     ctx[IClock] = Clock()
     ctx[IS3Data] = S3Data(ctx)
+    ctx[IMozLogging] = Logging(ctx)
     return ctx
