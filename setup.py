@@ -8,6 +8,19 @@ setup(
     include_package_data=True,
     packages=find_packages(exclude=['tests', 'tests/*']),
     description='SRG utilities',
+    long_description="""srgutil provides set of common tools required
+    for use with TAAR and other SRG applications.  
+
+    Among other things, srgutil provides:
+
+    * a context to inject dependencies into to reduce dependencies
+      between modules
+    * logging configuration that complies to mozlog format
+    * clock interfaces to make testing easier when wall clock time is
+      required
+    * S3 APIs to write date stamped files into S3 in a consistent
+      manner.
+    """,
     author='Mozilla Foundation',
     author_email='fx-data-dev@mozilla.org',
     url='https://github.com/mozilla/srgutil',
