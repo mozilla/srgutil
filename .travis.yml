@@ -1,13 +1,6 @@
 language: python
-
-matrix:
-  include:
-  - python: "2.7"
-    env: REQUIREMENTS="latest"
-  - python: "3.5"
-    env: REQUIREMENTS="latest"
-  - python: "2.7"
-    env: REQUIREMENTS="emr"
+python: 
+  - "3.6"
 
 before_install:
 # Work around https://github.com/travis-ci/travis-ci/issues/7940
@@ -16,31 +9,10 @@ before_install:
 install:
 # Update Travis
 - sudo apt-get update
-
-# Install conda
-- wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-- bash miniconda.sh -b -p $HOME/miniconda
-- export PATH="$HOME/miniconda/bin:$PATH"
-- hash -r
-- conda config --set always_yes yes --set changeps1 no
-- conda info -a
-
-# Setup environment
-- if [[ "$REQUIREMENTS" == "latest" ]]; then
-    conda create -n latest python=$TRAVIS_PYTHON_VERSION;
-    source activate latest;
-    pip install -e . --process-dependency-links;
-  elif [[ "$REQUIREMENTS" == "emr" ]]; then
-    conda env create -f environment_emr.yaml;
-    source activate emr;
-  else
-    exit 1;
-  fi
-- pip install -r test_requirements.txt
+- pip install .
+- pip install -r requirements.txt
 
 script:
-- flake8 srgutil tests || exit 1  # Fail if flake8 fails
+-     
+- flake8 --max-line-length=100 srgutil tests || exit 1  # Fail if flake8 fails
 - py.test --cov srgutil tests
-
-after_success:
-- coveralls

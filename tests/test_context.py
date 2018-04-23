@@ -33,4 +33,4 @@ def test_context():
 
 def test_default_context():
     ctx = default_context()
-    print (ctx)
+    print(ctx)
