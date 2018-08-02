@@ -1,4 +1,16 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+
+try:
+    from abc import ABC
+except:
+    from abc import ABCMeta
+
+    class ABC(object):
+        """Helper class that provides a standard way to create an ABC using
+        inheritance.
+        """
+        __metaclass__ = ABCMeta
+        __slots__ = ()
 
 
 class IS3Data(ABC):

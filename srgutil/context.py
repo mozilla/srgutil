@@ -80,7 +80,7 @@ class Context:
 def default_context():
     ctx = Context()
     from .base import Clock, S3Data
-    from .logging import Logging
+    from .log import Logging
 
     ctx[IClock] = Clock()
     ctx[IS3Data] = S3Data(ctx)
