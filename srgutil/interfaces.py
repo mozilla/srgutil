@@ -2,7 +2,7 @@ from abc import abstractmethod
 
 try:
     from abc import ABC
-except:
+except Exception:
     from abc import ABCMeta
 
     class ABC(object):
