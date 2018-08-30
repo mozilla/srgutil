@@ -12,4 +12,4 @@ install:
 - pip install .
 
 script:
-- py.test --cov srgutil tests
+- python setup.py test
