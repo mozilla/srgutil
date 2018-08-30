@@ -26,7 +26,7 @@ setup(
     """,
     name='mozilla-srgutil',
     url='https://github.com/mozilla/srgutil',
-    version='0.1.8',
+    version='0.1.9',
 
     # Dependencies
     install_requires=requirements,
