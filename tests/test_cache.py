@@ -5,15 +5,16 @@ import pytest
 
 from moto import mock_s3
 
+import pickle
 from srgutil.cache import LazyJSONLoader
 from srgutil.context import default_context
 from srgutil.interfaces import IClock
 
 
 # TODO Given that these are mocked, can they be anythin?
-ADDON_LIST_BUCKET = 'telemetry-parquet'
-ADDON_LIST_KEY = 'taar/lite/guid_coinstallation.json'
-GUID_RANKING_KEY = 'taar/list/guid_install_ranking.json'
+ADDON_LIST_BUCKET = "telemetry-parquet"
+ADDON_LIST_KEY = "taar/lite/guid_coinstallation.json"
+GUID_RANKING_KEY = "taar/list/guid_install_ranking.json"
 
 
 @pytest.fixture
@@ -24,48 +25,62 @@ def default_ctx():
 @pytest.fixture
 def MOCK_DATA():
     return {
-        'a': {'b': 1},
-        'b': {'a': 1},
+        "a": {"b": 1},
+        "b": {"a": 1},
     }
 
 
 @pytest.fixture
 def MOCK_GUID_RANKING():
     return {
-        'a': 10,
-        'b': 20,
+        "a": 10,
+        "b": 20,
     }
 
 
 def install_mock_data(MOCK_DATA, MOCK_GUID_RANKING):
-    conn = boto3.resource('s3', region_name='us-west-2')
+    conn = boto3.resource("s3", region_name="us-west-2")
 
     conn.create_bucket(Bucket=ADDON_LIST_BUCKET)
 
-    conn.Object(ADDON_LIST_BUCKET, ADDON_LIST_KEY)\
-        .put(Body=json.dumps(MOCK_DATA))
-    conn.Object(ADDON_LIST_BUCKET, GUID_RANKING_KEY)\
-        .put(Body=json.dumps(MOCK_GUID_RANKING))
+    conn.Object(ADDON_LIST_BUCKET, ADDON_LIST_KEY).put(
+        Body=json.dumps(MOCK_DATA)
+    )
+    conn.Object(ADDON_LIST_BUCKET, GUID_RANKING_KEY).put(
+        Body=json.dumps(MOCK_GUID_RANKING)
+    )
 
 
 @mock_s3
 def test_get_json_hot_cache(default_ctx, MOCK_DATA, MOCK_GUID_RANKING):
-    MOCK_DATA['s3_cached_copy'] = True
+    MOCK_DATA["s3_cached_copy"] = True
     install_mock_data(MOCK_DATA, MOCK_GUID_RANKING)
-    coinstall_loader = LazyJSONLoader(default_ctx,
-                                      ADDON_LIST_BUCKET,
-                                      ADDON_LIST_KEY)
+    coinstall_loader = LazyJSONLoader(
+        default_ctx, ADDON_LIST_BUCKET, ADDON_LIST_KEY
+    )
 
     actual, _ = coinstall_loader.get()
-    assert 's3_cached_copy' in actual
+    assert "s3_cached_copy" in actual
+
+
+@mock_s3
+def test_pickle_lazyjson(default_ctx, MOCK_DATA, MOCK_GUID_RANKING):
+    MOCK_DATA["s3_cached_copy"] = True
+    install_mock_data(MOCK_DATA, MOCK_GUID_RANKING)
+    coinstall_loader = LazyJSONLoader(
+        default_ctx, ADDON_LIST_BUCKET, ADDON_LIST_KEY
+    )
+
+    l_pickle = pickle.dumps(coinstall_loader)
+    pickle.loads(l_pickle)
 
 
 @mock_s3
 def test_get_json_cold_cache(default_ctx, MOCK_DATA, MOCK_GUID_RANKING):
     install_mock_data(MOCK_DATA, MOCK_GUID_RANKING)
-    coinstall_loader = LazyJSONLoader(default_ctx,
-                                      ADDON_LIST_BUCKET,
-                                      ADDON_LIST_KEY)
+    coinstall_loader = LazyJSONLoader(
+        default_ctx, ADDON_LIST_BUCKET, ADDON_LIST_KEY
+    )
 
     coinstall_loader._cached_copy = None
 
@@ -91,10 +106,9 @@ def test_cache_ttl_honored(default_ctx, MOCK_DATA, MOCK_GUID_RANKING, capsys):
 
     default_ctx[IClock] = clock
 
-    coinstall_loader = LazyJSONLoader(default_ctx,
-                                      ADDON_LIST_BUCKET,
-                                      ADDON_LIST_KEY,
-                                      30)
+    coinstall_loader = LazyJSONLoader(
+        default_ctx, ADDON_LIST_BUCKET, ADDON_LIST_KEY, 30
+    )
 
     # Force cached copy to be cleared
     coinstall_loader._cached_copy = None
@@ -114,7 +128,9 @@ def test_cache_ttl_honored(default_ctx, MOCK_DATA, MOCK_GUID_RANKING, capsys):
         def called(self):
             return self._called
 
-    coinstall_loader._refresh_cache = check_call(coinstall_loader._refresh_cache)
+    coinstall_loader._refresh_cache = check_call(
+        coinstall_loader._refresh_cache
+    )
 
     # Check that refresh cache is called on the get from cold cache
     # state

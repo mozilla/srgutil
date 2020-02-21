@@ -25,6 +25,19 @@ class LazyJSONLoader:
 
         self.logger.info("{} loader is initialized".format(self._key_str))
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['_lock']
+        del state['logger']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+        # Add the lock back since it doesn't exist in the pickle
+        self._lock = threading.RLock()
+        self.logger = self._ctx[IMozLogging].get_logger('srgutil')
+
     def has_expired(self):
         return self._clock.time() > self._expiry_time
 
