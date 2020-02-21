@@ -2,11 +2,12 @@ import time
 import boto3
 import json
 
+import pickle
 import pytest
 import requests_mock
 from moto import mock_s3
 from srgutil.context import default_context
-from srgutil.base import Clock
+from srgutil.base import Clock, S3CacheDelegate
 from srgutil.interfaces import IS3Data, IMozLogging
 
 EXPECTED_JSON = {"foo": 42}
@@ -33,16 +34,18 @@ def test_fetch_json(ctx):
     with requests_mock.mock() as m:
         uri = "http://127.0.0.1:9001/some-nonexistant-url-foo.json"
         m.get(uri, text=json.dumps(EXPECTED_JSON))
-        jdata = ctx.impl(IS3Data).fetch_json("http://127.0.0.1:9001/some-nonexistant-url-foo.json")
+        jdata = ctx.impl(IS3Data).fetch_json(
+            "http://127.0.0.1:9001/some-nonexistant-url-foo.json"
+        )
         assert jdata == EXPECTED_JSON
 
 
 @mock_s3
 def test_get_s3_json_content(ctx):
     """ Just test an S3 bucket and key that doesn't exist """
-    conn = boto3.resource('s3', region_name='us-west-2')
+    conn = boto3.resource("s3", region_name="us-west-2")
 
-    bucket = 'taar_not_my_bucket'
+    bucket = "taar_not_my_bucket"
     key = "this/is/not/a/valid/path"
 
     conn.create_bucket(Bucket=bucket)
@@ -58,10 +61,10 @@ def test_get_s3_json_content(ctx):
 def test_logger_name(ctx, capsys):
     logging = ctx[IMozLogging]
 
-    assert logging.get_prefix() == 'srg'
-    logging.set_prefix('srgutil')
+    assert logging.get_prefix() == "srg"
+    logging.set_prefix("srgutil")
 
-    logger = logging.get_logger('foo')
+    logger = logging.get_logger("foo")
     logger.info("some log info")
 
     captured = capsys.readouterr()
@@ -79,10 +82,16 @@ def test_logger_name(ctx, capsys):
     """
 
     jdata = json.loads(captured.err)
-    assert jdata['Logger'] == 'srgutil'
+    assert jdata["Logger"] == "srgutil"
 
     # The logger.get_logger method uses the application namespace as a
     # prefix
-    assert jdata['Type'] == 'srgutil.foo'
+    assert jdata["Type"] == "srgutil.foo"
 
-    assert jdata['Fields']['msg'] == 'some log info'
+    assert jdata["Fields"]["msg"] == "some log info"
+
+
+def test_s3cachedelegate_pickle(ctx):
+    s3d = S3CacheDelegate(ctx)
+    s3d_pickle = pickle.dumps(s3d)
+    pickle.loads(s3d_pickle)

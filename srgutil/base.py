@@ -40,6 +40,19 @@ class S3CacheDelegate(object):
         self._lock = threading.RLock()
         self._json_cache = {}
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['_lock']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+        # Add the lock back since it doesn't exist in the pickle
+        self._lock = threading.RLock()
+
+
+
     # Private
     def _refresh_expiry(self):
         self._expiry_time = self._ctx[IClock].time() + self._ttl

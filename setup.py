@@ -21,25 +21,10 @@ setup(
     """,
     name="mozilla-srgutil",
     url="https://github.com/mozilla/srgutil",
-    version="0.1.10",
+    version="0.1.11",
     # Dependencies
     # Note that we only care about unversioned requirements in
     # setup.py.  We pin those versions with requirements.txt
-    install_requires=[
-        "boto3==1.7.2",  # 1.7.2 won't break with moto >=1.3.5.
-        # More recent versions of boto3
-        # will die under test
-        "dockerflow>=2018.4.0",
-        "requests>=2.19.1",
-    ],
-    tests_require=[
-        "moto>=1.3.5",
-        "pytest>=3.7.4",
-        "pytest-cov>=2.5.1",
-        "pytest-flake8>=1.0.2",
-        "requests-mock>=1.5.2",
-    ],
-    setup_requires=["pytest-runner", "dockerflow"],
     # Packaging
     include_package_data=True,
     packages=find_packages(exclude=["tests", "tests/*"]),
