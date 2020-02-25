@@ -7,7 +7,7 @@ from moto import mock_s3
 
 import pickle
 from srgutil.cache import LazyJSONLoader
-from srgutil.context import default_context
+from srgutil.context import default_context as d_ctx
 from srgutil.interfaces import IClock
 
 
@@ -19,7 +19,7 @@ GUID_RANKING_KEY = "taar/list/guid_install_ranking.json"
 
 @pytest.fixture
 def default_ctx():
-    return default_context()
+    return d_ctx()
 
 
 @pytest.fixture
@@ -104,7 +104,7 @@ def test_cache_ttl_honored(default_ctx, MOCK_DATA, MOCK_GUID_RANKING, capsys):
     clock = mock_clock()
     clock.set_time(0)
 
-    default_ctx[IClock] = clock
+    default_ctx.set(IClock, clock)
 
     coinstall_loader = LazyJSONLoader(
         default_ctx, ADDON_LIST_BUCKET, ADDON_LIST_KEY, 30

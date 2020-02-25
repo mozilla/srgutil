@@ -16,6 +16,9 @@ chain.
 from srgutil.interfaces import IS3Data, IClock, IMozLogging
 
 
+class NoDefault:
+    pass
+
 class InvalidInterface(Exception):
     """Raise this when impl() fails to export an implementation"""
     pass
@@ -29,33 +32,30 @@ class Context:
         self._local_dict = {}
         self._delegate = delegate
 
-    def __contains__(self, key):
+    def contains(self, key):
         try:
-            self[key]
+            self.get(key)
             return True
         except KeyError:
             return False
 
-    def __getitem__(self, key):
+    def get(self, key, default=NoDefault):
         # This is a little tricky, we want to lookup items in our
         # local namespace before we hit the delegate
         try:
-            result = self._local_dict[key]
+            return self._local_dict[key]
         except KeyError:
-            result = self._delegate[key]
-        return result
+            try:
+                return self._delegate.get(key)
+            except KeyError:
+                if default is not NoDefault:
+                    return default
+                raise
 
-    def get(self, key, default):
-        try:
-            result = self[key]
-        except KeyError:
-            result = default
-        return result
-
-    def __setitem__(self, key, value):
+    def set(self, key, value):
         self._local_dict[key] = value
 
-    def __delitem__(self, key):
+    def delete(self, key):
         del self._local_dict[key]
 
     def wrap(self, ctx):
@@ -82,7 +82,7 @@ def default_context():
     from .base import Clock, S3Data
     from .log import Logging
 
-    ctx[IClock] = Clock()
-    ctx[IS3Data] = S3Data(ctx)
-    ctx[IMozLogging] = Logging(ctx)
+    ctx.set(IClock, Clock())
+    ctx.set(IS3Data, S3Data(ctx))
+    ctx.set(IMozLogging, Logging(ctx))
     return ctx

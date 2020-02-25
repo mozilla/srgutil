@@ -7,8 +7,8 @@ import threading
 class LazyJSONLoader:
     def __init__(self, ctx, s3_bucket, s3_key, ttl=14400):
         self._ctx = ctx
-        self.logger = self._ctx[IMozLogging].get_logger('srgutil')
-        self._clock = self._ctx[IClock]
+        self.logger = self._ctx.get(IMozLogging).get_logger('srgutil')
+        self._clock = self._ctx.get(IClock)
 
         self._s3_bucket = s3_bucket
         self._s3_key = s3_key
@@ -36,7 +36,7 @@ class LazyJSONLoader:
 
         # Add the lock back since it doesn't exist in the pickle
         self._lock = threading.RLock()
-        self.logger = self._ctx[IMozLogging].get_logger('srgutil')
+        self.logger = self._ctx.get(IMozLogging).get_logger('srgutil')
 
     def has_expired(self):
         return self._clock.time() > self._expiry_time

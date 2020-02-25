@@ -55,11 +55,11 @@ class S3CacheDelegate(object):
 
     # Private
     def _refresh_expiry(self):
-        self._expiry_time = self._ctx[IClock].time() + self._ttl
+        self._expiry_time = self._ctx.get(IClock).time() + self._ttl
 
     def _expire_cache(self):
         with self._lock:
-            clock = self._ctx[IClock]
+            clock = self._ctx.get(IClock)
             if clock.time() >= self._expiry_time:
                 self._json_cache.clear()
                 self._s3_json_cache.clear()
@@ -87,7 +87,7 @@ class S3CacheDelegate(object):
 
 class S3Data(IS3Data):
     def __init__(self, ctx):
-        assert IClock in ctx
+        assert ctx.contains(IClock)
         self._ctx = ctx
         self._delegate = S3CacheDelegate(ctx.child())
 

@@ -51,17 +51,24 @@ def test_get_s3_json_content(ctx):
     conn.create_bucket(Bucket=bucket)
     conn.Object(bucket, key).put(Body=json.dumps(EXPECTED_S3_JSON))
 
-    s3data = ctx[IS3Data]
+    s3data = ctx.get(IS3Data)
     s3data.get_s3_json_content(bucket, key)
     jdata = s3data.get_s3_json_content(bucket, key)
     assert jdata == EXPECTED_S3_JSON
 
 
 @mock_s3
-def test_logger_name(ctx, capsys):
-    logging = ctx[IMozLogging]
+def test_serialize_ctx_with_logging(ctx):
+    ctx = ctx.child()
+    c_pickle = pickle.dumps(ctx)
+    pickle.loads(c_pickle)
 
-    assert logging.get_prefix() == "srg"
+
+@mock_s3
+def test_logger_name(ctx, capsys):
+    logging = ctx.get(IMozLogging)
+
+    assert logging.get_prefix().startswith("srg")
     logging.set_prefix("srgutil")
 
     logger = logging.get_logger("foo")
