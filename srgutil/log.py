@@ -6,34 +6,35 @@
 import logging.config
 from srgutil.interfaces import IMozLogging
 
+_LOG_CONFIG = {
+    # Note that the formatters.json.logger_name must match
+    # loggers.<logger_name> key
+    'version': 1,
+    'formatters': {
+        'json': {
+            '()': 'dockerflow.logging.JsonLogFormatter',
+            'logger_name': 'srg'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'json'
+        },
+    },
+    'loggers': {
+        'srg': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    }
+}
 
 class Logging(IMozLogging):
-    _log_config = {
-        # Note that the formatters.json.logger_name must match
-        # loggers.<logger_name> key
-        'version': 1,
-        'formatters': {
-            'json': {
-                '()': 'dockerflow.logging.JsonLogFormatter',
-                'logger_name': 'srg'
-            }
-        },
-        'handlers': {
-            'console': {
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-                'formatter': 'json'
-            },
-        },
-        'loggers': {
-            'srg': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-            },
-        }
-    }
 
     def __init__(self, ctx):
+        self._log_config = _LOG_CONFIG
         self._ctx = ctx
         self._logger_prefix = ''
         self._apply_config()
@@ -55,3 +56,7 @@ class Logging(IMozLogging):
 
     def get_logger(self, name):
         return logging.getLogger("%s.%s" % (self._logger_prefix, name))
+
+def get_logger(name):
+    _logger_prefix = _LOG_CONFIG['formatters']['json']['logger_name']
+    return logging.getLogger("%s.%s" % (_logger_prefix, name))

@@ -89,7 +89,7 @@ class S3Data(IS3Data):
     def __init__(self, ctx):
         assert ctx.contains(IClock)
         self._ctx = ctx
-        self._delegate = S3CacheDelegate(ctx.child())
+        self._delegate = S3CacheDelegate(ctx)
 
     # Private
     def _raw_http_get_json(self, uri):

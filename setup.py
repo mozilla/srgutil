@@ -21,7 +21,7 @@ setup(
     """,
     name="mozilla-srgutil",
     url="https://github.com/mozilla/srgutil",
-    version="0.2.0",
+    version="0.2.1",
     # Dependencies
     # Note that we only care about unversioned requirements in
     # setup.py.  We pin those versions with requirements.txt

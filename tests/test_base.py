@@ -59,9 +59,9 @@ def test_get_s3_json_content(ctx):
 
 @mock_s3
 def test_serialize_ctx_with_logging(ctx):
-    ctx = ctx.child()
     c_pickle = pickle.dumps(ctx)
-    pickle.loads(c_pickle)
+    restored = pickle.loads(c_pickle)
+    assert restored.get(IMozLogging, None) is not None
 
 
 @mock_s3
